@@ -4,11 +4,12 @@ import driver.SingletonDriver;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 
+
 public class DriverHooks {
-//    @Before
-//    public void setupDriver(){
-//        SingletonDriver.getInstance();
-//    }
+    @Before
+    public void setupDriver(){
+        SingletonDriver.getInstance();
+    }
 
     @After
     public void quitDriver(){

@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
         monochrome = true,
         tags= "@Regression",
         glue = "com.cucumber.junit",
-        features = "classpath:com/cucumber.junit.features"
+        features = "src/test/resources/com/cucumber/junit/features"
 )
 public class CucumberTest {
 }

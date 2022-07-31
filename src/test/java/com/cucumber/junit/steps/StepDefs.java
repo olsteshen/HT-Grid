@@ -3,6 +3,7 @@ package com.cucumber.junit.steps;
 import desktop.pages.*;
 import driver.SingletonDriver;
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.Transpose;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -12,7 +13,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
-
+import java.util.Map;
 import static constants.Constants.*;
 
 public class StepDefs {
@@ -29,10 +30,11 @@ public class StepDefs {
         homePageObject = new HomePage(driver);
     }
 
+
     @Given("I open the {string}")
     public void openPage(String pageName) {
-        if (pageName.equals("Initial home page")) {
-            homePageObject = new HomePage(driver);
+        if(pageName.equals("Initial home page")){
+        homePageObject = new HomePage(driver);
         }
     }
 
@@ -62,7 +64,8 @@ public class StepDefs {
     @Then("^the user is logged in$")
     public void advancedSearchPageIsDisplayed() {
         Assertions.assertThat(accountPageObject.pageURL().equals(SIGN_IN_PAGE_URL))
-                .overridingErrorMessage("User is not logged in");
+                .overridingErrorMessage("User is not logged in")
+                .isTrue();
     }
 
     @Given("I am an anonymous customer with clear cookies")
@@ -70,17 +73,18 @@ public class StepDefs {
         driver.manage().deleteAllCookies();
     }
 
+
     @And("Search results contain the following products")
     public void checkSearchResultsContainsProducts(List<String> expectedBookNames) {
-        Assertions.assertThat(searchResultsPageObject.getBookTitleInResults())
-                .extracting(WebElement::getText)
-                .as("Some of the books are not shown")
-                .containsAll(expectedBookNames);
+       Assertions.assertThat(searchResultsPageObject.getBookTitleInResults())
+               .extracting(WebElement::getText)
+               .as("Some of the books are not shown")
+               .containsAll(expectedBookNames);
     }
 
     @And("I apply the following search filters")
     public void applySearchFilters(DataTable filtersData) {
-        searchResultsPageObject.applyFilters(filtersData);
+    searchResultsPageObject.applyFilters(filtersData);
     }
 
     @Then("Search results contain only the following products")
@@ -95,17 +99,20 @@ public class StepDefs {
     public void checkPageURL(String pageName) {
         switch (pageName) {
             case "Basket page" -> Assertions.assertThat(basketPageObject.pageURL().equals(BASKET_PAGE_URL))
-                    .overridingErrorMessage("Wrong page url");
+                    .overridingErrorMessage("Wrong page url")
+                    .isTrue();
             case "Checkout page" -> Assertions.assertThat(checkoutPageObject.pageURL().equals(CHECKOUT_PAGE_URL))
-                    .overridingErrorMessage("Wrong page url");
-            case "Search page" -> Assertions.assertThat(searchResultsPageObject.pageURL().equals(SEARCH_RESULT_PAGE_URL))
-                    .overridingErrorMessage("Wrong page url");
+                    .overridingErrorMessage("Wrong page url")
+                    .isTrue();
+            case "Search page" -> Assertions.assertThat(searchResultsPageObject.pageURL().contains(SEARCH_RESULT_PAGE_URL))
+                    .overridingErrorMessage("Wrong page url")
+                    .isTrue();
         }
     }
 
     @When("I click 'Add to basket' button for product with name {string}")
     public void clickATBButton(String productName) {
-        searchResultsPageObject.atbButtonOnProductTile(productName).click();
+        searchResultsPageObject.atbButton(productName).click();
     }
 
     @When("I click 'Checkout' button on 'Basket' page")
@@ -119,12 +126,12 @@ public class StepDefs {
     }
 
     @Then("the following validation error messages are displayed on 'Delivery Address' form:")
-    public void checkValidationErrorMessage(DataTable expectedErrors) {
+    public void checkValidationErrorMessage(List<Map<String, String>> expectedErrors){
         checkoutPageObject.checkErrorMessage(expectedErrors);
     }
 
     @And("Checkout order summary is as following:")
-    public void checkOrderSummary(DataTable orderSummary) {
+    public void checkOrderSummary(@Transpose Map<String, String> orderSummary) {
         checkoutPageObject.checkOrderSummary(orderSummary);
     }
 
@@ -134,17 +141,21 @@ public class StepDefs {
     }
 
     @When("I fill delivery address information manually:")
-    public void fillDeliveryAddressFields(DataTable deliveryAddress) {
+    public void fillDeliveryAddressFields(@Transpose Map<String, String> deliveryAddress) {
         checkoutPageObject.fillAddressFields(deliveryAddress);
     }
 
     @Then("the following validation error messages are displayed on 'Payment' form:")
     public void checkValidationErrorMessage(String expectedError) {
-        Assertions.assertThat(checkoutPageObject.getErrorMessagePaymentForm().getText().equals(expectedError)).overridingErrorMessage("Validation messages are not as expected");
+        String error = expectedError.replace(",", "");
+        String actualError = checkoutPageObject.getErrorMessagePaymentForm().getText().replace("\n", " ");
+        Assertions.assertThat(actualError.equals(error))
+                .overridingErrorMessage("error message is not as expected")
+                .isTrue();
     }
 
     @When("I enter my card details")
-    public void fillCardDetails(DataTable cardDetails) {
+    public void fillCardDetails(Map<String, String> cardDetails) {
         checkoutPageObject.enterCardDetails(cardDetails);
     }
 
@@ -153,14 +164,16 @@ public class StepDefs {
         basketPageObject.checkBasketOrderSummary(basketSummary);
     }
 
-    //There is currently no way to escape a / character - it will always be interpreted as alternative text.
     @And("I select 'Basket Checkout' in basket pop-up")
-    public void selectBasketCheckout() {
-        basketPageObject = searchResultsPageObject.clickContinuebutton();
+    public void clickButtonContinue() {
+        basketPageObject = searchResultsPageObject.clickButtonContinue();
     }
 
     @Then("there is no validation error messages displayed on 'Delivery Address' form")
     public void checkNoErrorInAddressForm() {
-        Assertions.assertThat(checkoutPageObject.getErrorMessageAddressForm().isEmpty()).overridingErrorMessage("The validation messages are displayed");
+        Assertions.assertThat(checkoutPageObject.getErrorMessageAddressForm())
+                .extracting(WebElement::getText)
+                .as("Error message in Delivery Address form")
+                .containsOnly("");
     }
 }
