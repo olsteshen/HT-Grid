@@ -28,7 +28,7 @@ Feature: Desktop Checkout for Guest User
     Then I am redirected to a "Basket page"
     And Basket order summary is as following:
       | Delivery cost | Total   |
-      | FREE          | 82,32 € |
+      | FREE          | 84,26 € |
     When I click 'Checkout' button on 'Basket' page
     Then I am redirected to a "Checkout page"
     When I click 'Buy now' button
@@ -42,8 +42,8 @@ Feature: Desktop Checkout for Guest User
     And the following validation error messages are displayed on 'Payment' form:
       | Please enter your card number, Please enter your card's expiration date, Please enter your CVV |
     And Checkout order summary is as following:
-      | Sub-total | Delivery | VAT    | Total  |
-      | 82,32 €   | FREE     | 0,00 € | 82,32 € |
+      | Sub-total | Delivery | VAT    | Total   |
+      | 84,26 €   | FREE     | 0,00 € | 84,26 € |
     And I checkout as a new customer with email "test@user.com"
     When I fill delivery address information manually:
       | Full name | Delivery country | Address line 1   | Address line 2   | Town/City | County/State | Postcode |
